@@ -31,3 +31,7 @@ jobs:
       - name: Run automated test suite (Pytest)
         run: |
           pytest app-test
+
+      - name: Build Docker image
+        run: |
+          docker build -t cloud-foundation-app:${{ github.sha }} .
