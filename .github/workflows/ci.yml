@@ -35,3 +35,11 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t cloud-foundation-app:${{ github.sha }} .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "cloud-foundation-app:${{ github.sha }}"
+          format: "table"
+          exit-code: "0"
+          severity: "CRITICAL,HIGH"
