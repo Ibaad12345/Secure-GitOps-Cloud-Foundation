@@ -36,6 +36,12 @@ jobs:
         run: |
           pytest app-test
 
+      - name: Prepare lowercase image name
+        run: |
+          # Converts repository_owner to strictly lowercase for Docker compatibility
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_NAME=ghcr.io/${OWNER_LC}/cloud-foundation-app" >> $GITHUB_ENV
+
       - name: Log in to GitHub Container Registry
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
@@ -46,13 +52,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/cloud-foundation-app:${{ github.sha }} \
-                       -t ghcr.io/${{ github.repository_owner }}/cloud-foundation-app:latest .
+          docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} \
+                       -t ${{ env.IMAGE_NAME }}:latest .
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: "ghcr.io/${{ github.repository_owner }}/cloud-foundation-app:${{ github.sha }}"
+          image-ref: "${{ env.IMAGE_NAME }}:${{ github.sha }}"
           format: "table"
           exit-code: "0"
           severity: "CRITICAL,HIGH"
@@ -60,5 +66,5 @@ jobs:
       - name: Push Docker image to GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/cloud-foundation-app:${{ github.sha }}
-          docker push ghcr.io/${{ github.repository_owner }}/cloud-foundation-app:latest
+          docker push ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.IMAGE_NAME }}:latest
