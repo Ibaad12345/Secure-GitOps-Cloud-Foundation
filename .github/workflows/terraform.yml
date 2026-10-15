@@ -30,13 +30,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Authenticate to AWS via OIDC (No Static Keys)
+# 2. Authenticate to AWS via OIDC (No Static Keys)
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::641471776379:role/github-actions-terraform-role
           aws-region: eu-west-2
-          audience: sts.amazonaws.com
 
       # 3. Setup Terraform CLI
       - name: Setup Terraform

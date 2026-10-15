@@ -21,7 +21,10 @@ resource "aws_iam_role" "github_actions_role" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:Ibaad12345/Secure-GitOps-Cloud-Foundation:*"
+            "token.actions.githubusercontent.com:sub" = [
+              "repo:Ibaad12345/Secure-GitOps-Cloud-Foundation:*",
+              "repo:ibaad12345/Secure-GitOps-Cloud-Foundation:*"
+            ]
           }
         }
       }
@@ -39,7 +42,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_admin" {
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
-# 4. Output the Role ARN needed by the GitHub Actions workflow
+# 4. Output the Role ARN
 output "github_actions_role_arn" {
   description = "ARN of the IAM role assumed by GitHub Actions via OIDC"
   value       = aws_iam_role.github_actions_role.arn
