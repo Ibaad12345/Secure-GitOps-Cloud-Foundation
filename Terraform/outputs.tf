@@ -1,9 +1,14 @@
-output "public_ip" {
-  description = "Public IP address of the EC2 instance"
-  value       = aws_instance.app_server.public_ip
+output "vpc_id" {
+  description = "ID of the custom VPC"
+  value       = aws_vpc.main.id
 }
 
-output "app_url" {
-  description = "Direct health check URL"
-  value       = "http://${aws_instance.app_server.public_ip}:8000/health"
+output "alb_dns_name" {
+  description = "Public DNS name of the Application Load Balancer"
+  value       = aws_lb.main.dns_name
+}
+
+output "alb_url" {
+  description = "Direct health check URL through the ALB on standard port 80"
+  value       = "http://${aws_lb.main.dns_name}/health"
 }

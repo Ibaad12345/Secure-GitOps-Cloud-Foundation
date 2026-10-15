@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - "terraform/**"
+      - "Terraform/**"
   pull_request:
     branches:
       - main
     paths:
-      - "terraform/**"
+      - "Terraform/**"
 
 permissions:
   id-token: write      # Required for minting the GitHub OIDC JWT
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: terraform
+        working-directory: Terraform
 
     steps:
       # 1. Check out repository code
