@@ -1,0 +1,67 @@
+name: "Terraform GitOps Pipeline"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "terraform/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "terraform/**"
+
+permissions:
+  id-token: write      # Required for minting the GitHub OIDC JWT
+  contents: read       # Required to check out repository code
+  pull-requests: write # Allows writing plan comments on PRs
+
+jobs:
+  terraform:
+    name: "Terraform Plan & Apply"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      # 1. Check out repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Authenticate to AWS via OIDC (No Static Keys)
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::641471776379:role/github-actions-terraform-role
+          aws-region: eu-west-2
+          audience: sts.amazonaws.com
+
+      # 3. Setup Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      # 4. Check formatting
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      # 5. Initialize working directory and S3 backend
+      - name: Terraform Init
+        run: terraform init
+
+      # 6. Validate configuration files
+      - name: Terraform Validate
+        run: terraform validate
+
+      # 7. Terraform Plan (Runs on both PRs and pushes to main)
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -out=tfplan
+
+      # 8. Terraform Apply (Runs ONLY on merge or direct push to main)
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan
